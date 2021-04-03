@@ -1,1 +1,2 @@
-Feature4 not so cool
+Feature4 normal
+
