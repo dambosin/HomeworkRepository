@@ -8,10 +8,22 @@ namespace dayOfWeek
         
         static void WriteDay(DayOfWeek day)
         {
-            int temp = (int)day+1;
+            int temp = (int)day + 1;
+            if ((int)System.DateTime.Now.DayOfWeek == (int)day)
+            {
+                Console.Write("Today is ");
+            }
             Console.ForegroundColor = (ConsoleColor)temp;
-            Console.WriteLine(day);
+            Console.WriteLine($"{day} - {(int)day}");
             Console.ResetColor();
+            if ((int)day != 6 && (int)day != 0)
+            {
+                Console.WriteLine($"{6 - (int)day} days till weekends");
+            }
+            else
+            {
+                Console.WriteLine($"You are on the weekends!");
+            }
         }
 
         static void WriteDays()
@@ -25,11 +37,11 @@ namespace dayOfWeek
         
         static void Main(string[] args)
         {
+            Console.WriteLine((int)System.DateTime.Now.DayOfWeek);
             string day = Console.ReadLine();
             day = day.ToLower();
             bool isCorrect = true;
             DayOfWeek days = DayOfWeek.Monday;
-            ConsoleColor dayColor = ConsoleColor.White;
             switch(day)
             {
                 case "monday": case "mon":
