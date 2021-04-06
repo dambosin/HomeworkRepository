@@ -9,7 +9,8 @@ namespace dayOfWeek
         static void WriteDay(DayOfWeek day)
         {
             int temp = (int)day + 1;
-            if ((int)System.DateTime.Now.DayOfWeek == (int)day)
+            int todayDay = (int)System.DateTime.Now.DayOfWeek;
+            if (todayDay == (int)day)
             {
                 Console.Write("Today is ");
             }
@@ -24,6 +25,9 @@ namespace dayOfWeek
             {
                 Console.WriteLine($"You are on the weekends!");
             }
+            int daysTillNext = todayDay >= (int)day ? (int)day + 7 - todayDay : (int)day - todayDay;
+            Console.Write($"The next {day} will be on ");
+            Console.WriteLine(System.DateTime.Now.AddDays(daysTillNext).Date);
         }
 
         static void WriteDays()
@@ -37,7 +41,7 @@ namespace dayOfWeek
         
         static void Main(string[] args)
         {
-            Console.WriteLine((int)System.DateTime.Now.DayOfWeek);
+            
             string day = Console.ReadLine();
             day = day.ToLower();
             bool isCorrect = true;
