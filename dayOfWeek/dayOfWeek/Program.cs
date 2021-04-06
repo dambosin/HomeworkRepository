@@ -4,12 +4,32 @@ namespace dayOfWeek
 {
     class Program
     {
+
+        
+        static void WriteDay(DayOfWeek day)
+        {
+            int temp = (int)day+1;
+            Console.ForegroundColor = (ConsoleColor)temp;
+            Console.WriteLine(day);
+            Console.ResetColor();
+        }
+
+        static void WriteDays()
+        {
+            for(int i = 0; i < 7; i++)
+            {
+                WriteDay((DayOfWeek)i);
+            }
+        }
+
+        
         static void Main(string[] args)
         {
             string day = Console.ReadLine();
             day = day.ToLower();
             bool isCorrect = true;
             DayOfWeek days = DayOfWeek.Monday;
+            ConsoleColor dayColor = ConsoleColor.White;
             switch(day)
             {
                 case "monday": case "mon":
@@ -40,13 +60,12 @@ namespace dayOfWeek
                     days = DayOfWeek.Sunday;
                     break;
                 default:
-                    Console.WriteLine("There is no such day in our week");
                     isCorrect = false;
                     break;
             }
             if (isCorrect)
             {
-                Console.WriteLine(days);
+                WriteDay(days);
             }
             else
             {
