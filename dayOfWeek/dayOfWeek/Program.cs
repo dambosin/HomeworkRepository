@@ -4,89 +4,77 @@ namespace dayOfWeek
 {
     class Program
     {
+        static void Main(string[] args)
+        {
+            while (true)
+            {
+                string day = Console.ReadLine();
+                bool isCorrect = true;
+                DayOfWeek days = DayOfWeek.Monday;
 
-        
+                switch (day.ToLower())
+                {
+                    case "monday" or "mon":
+                        break;
+                    case "tuesday" or "tue":
+                        days = DayOfWeek.Tuesday;
+                        break;
+                    case "wednesday" or "wed":
+                        days = DayOfWeek.Wednesday;
+                        break;
+                    case "thursday" or "thu":
+                        days = DayOfWeek.Thursday;
+                        break;
+                    case "friday" or "fri":
+                        days = DayOfWeek.Friday;
+                        break;
+                    case "saturday" or "sat":
+                        days = DayOfWeek.Saturday;
+                        break;
+                    case "sunday" or "sun":
+                        days = DayOfWeek.Sunday;
+                        break;
+                    default:
+                        isCorrect = false;
+                        break;
+                }
+
+                if (isCorrect)
+                {
+                    WriteDay(days);
+                }
+                else
+                {
+                    Console.WriteLine("There is no such day in week");
+                }
+            }
+        }
         static void WriteDay(DayOfWeek day)
         {
-            int temp = (int)day + 1;
-            int todayDay = (int)System.DateTime.Now.DayOfWeek;
-            if (todayDay == (int)day)
+            var temp = day + 1;
+            var todayDay = DateTime.Now.DayOfWeek;
+
+            if (todayDay == day)
             {
                 Console.Write("Today is ");
             }
+
             Console.ForegroundColor = (ConsoleColor)temp;
             Console.WriteLine($"{day} - {(int)day}");
             Console.ResetColor();
-            if ((int)day != 6 && (int)day != 0)
+
+            if ((int)day != 6 && day != 0)
             {
-                Console.WriteLine($"{6 - (int)day} days till weekends");
+                Console.WriteLine($"{6 - day} days till weekends");
             }
             else
             {
                 Console.WriteLine($"You are on the weekends!");
             }
-            int daysTillNext = todayDay >= (int)day ? (int)day + 7 - todayDay : (int)day - todayDay;
+
+            int daysTillNext = todayDay >= day ? day + 7 - todayDay : day - todayDay;
             Console.Write($"The next {day} will be on ");
-            Console.WriteLine(System.DateTime.Now.AddDays(daysTillNext).Date);
-        }
-
-        static void WriteDays()
-        {
-            for(int i = 0; i < 7; i++)
-            {
-                WriteDay((DayOfWeek)i);
-            }
-        }
-
-        
-        static void Main(string[] args)
-        {
-            
-            string day = Console.ReadLine();
-            day = day.ToLower();
-            bool isCorrect = true;
-            DayOfWeek days = DayOfWeek.Monday;
-            switch(day)
-            {
-                case "monday": case "mon":
-                    days = DayOfWeek.Monday;
-                    break;
-                case "tuesday":
-                case "tue":
-                    days = DayOfWeek.Tuesday;
-                    break;
-                case "wednesday":
-                case "wed":
-                    days = DayOfWeek.Wednesday;
-                    break;
-                case "thursday":
-                case "thu":
-                    days = DayOfWeek.Thursday;
-                    break;
-                case "friday":
-                case "fri":
-                    days = DayOfWeek.Friday;
-                    break;
-                case "saturday":
-                case "sat":
-                    days = DayOfWeek.Saturday;
-                    break;
-                case "sunday":
-                case "sun":
-                    days = DayOfWeek.Sunday;
-                    break;
-                default:
-                    isCorrect = false;
-                    break;
-            }
-            if (isCorrect)
-            {
-                WriteDay(days);
-            }
-            else
-            {
-                Console.WriteLine("There is no such day in week");
-            }
+            Console.WriteLine(DateTime.Now.AddDays(daysTillNext).ToShortDateString());
         }
     }
 }
