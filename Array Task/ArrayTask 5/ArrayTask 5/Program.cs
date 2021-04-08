@@ -35,7 +35,7 @@ namespace ArrayTask_5
 
             int duplicates = 0;
 
-            for (int i = 0; i <= duplicateArr.GetUpperBound(0); i++)
+            for (int i = 0; i < length; i++)
             {
                 duplicates += duplicateArr[i, 1];
             }

@@ -6,8 +6,7 @@ namespace ArrayTask4
     {
         static void Main(string[] args)
         {
-            int n;
-            n = Convert.ToInt32(Console.ReadLine());
+            int n = Convert.ToInt32(Console.ReadLine());
             int[] arr1 = new int[n];
 
             for(int i = 0; i < n; i++)
@@ -22,7 +21,6 @@ namespace ArrayTask4
             Console.WriteLine("Copied array");
             WriteArray(arr2);
         }
-
         static void WriteArray(int[] arr)
         {
             foreach(int i in arr)

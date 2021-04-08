@@ -6,8 +6,7 @@ namespace ArrayTask3
     {
         static void Main(string[] args)
         {
-            int n;
-            n = Convert.ToInt32(Console.ReadLine());
+            int n = Convert.ToInt32(Console.ReadLine());
             long sum = 0;
 
             for(int i = 0; i < n; i++)
