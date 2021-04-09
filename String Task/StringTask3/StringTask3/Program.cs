@@ -7,13 +7,12 @@ namespace StringTask3
         static void Main(string[] args)
         {
             var someText = Console.ReadLine();
-            
-            for(int i = 0; i < someText.Length; i += 2)
-            {
-                someText = someText.Insert(i + 1, " ");
-            }
+            char[] arr = someText.ToCharArray();
 
-            Console.WriteLine(someText);
+            foreach(char i in arr)
+            {
+                Console.Write($"{i} ");
+            }
         }
     }
 }
