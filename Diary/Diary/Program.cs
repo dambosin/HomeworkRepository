@@ -18,6 +18,7 @@ namespace Diary
             {
                 i.DisplayTask(true);
             }
+            WriteDataToFile(tasks);
             
         }
         public enum Priority
@@ -74,15 +75,18 @@ namespace Diary
                 TaskDate = date;
                 TaskPriority = priority;
             }
-
+            public string WriteToFile()
+            {
+                return TaskName + ";" + TaskDate + ";" + TaskPriority;
+            }
             public void DisplayTask()
             {
-                Console.ForegroundColor = (ConsoleColor)TaskPriority;
-                Console.WriteLine($"ID {TaskID}");
-                Console.WriteLine(TaskName);
-                Console.WriteLine(TaskDate);
-                Console.WriteLine($"Priority is {TaskPriority}\n");
-                Console.ResetColor();
+                ForegroundColor = (ConsoleColor)TaskPriority;
+                WriteLine($"ID {TaskID}");
+                WriteLine(TaskName);
+                WriteLine(TaskDate);
+                WriteLine($"Priority is {TaskPriority}\n");
+                ResetColor();
             }
 
             public void DisplayTask(bool isShort)
@@ -101,11 +105,11 @@ namespace Diary
         }
         public static List<WeeklyTask> ReadDataFromFile()
         {
-            WriteLine("Do you want to read data from file");
-            var ans = ReadLine();
+            WriteLine("Do you want to read data from file?");
+            var ans = ReadLine().ToLower();
             if (ans.ToLower(default) == "yes")
             {
-                WriteLine("Enter the path to file");
+                WriteLine("Write the path to file");
                 var path = ReadLine();
                 var tasks = new List<WeeklyTask>();
                 using (var readFile = new StreamReader(path, Encoding.Default))
@@ -126,42 +130,36 @@ namespace Diary
         public static WeeklyTask DisassemblyLine(string line)
         {
             var array = line.Split(';');
-            array[1] = array[1].Trim();
-            if (DateTime.TryParse(array[1], out var dateTime))
+            if (!DateTime.TryParse(array[1], out var dateTime))
             {
-                array[2] = array[2].Trim();
-                Priority priority;
-                switch (array[2].ToLower())
-                {
-                    case "low":
-                        priority = Priority.Low;
-                        break;
-                    case "medium":
-                        priority = Priority.Medium;
-                        break;
-                    default:
-                        priority = Priority.High;
-                        break;
-                }
-                return new WeeklyTask(array[0], dateTime, priority);
+                throw new Exception("Cannot disassembly the date");
             }
-            else
+            var priority = array[2].ToLower() switch
             {
-                throw new Exception("Cannot disassembly the line");
-            }
+                "low" => Priority.Low,
+                "medium" => Priority.Medium,
+                _ => Priority.High,
+            };
+            return new WeeklyTask(array[0], dateTime, priority);
 
 
         }
-        public static string[] CheckFor0(string[] arr)
+        public static void WriteDataToFile(List<WeeklyTask> tasks)
         {
-            for (int i = 0; i < arr.Length; i++)
+            WriteLine("Do you want to store data in file?");
+            var ans = ReadLine().ToLower();
+            if(ans == "yes")
             {
-                if(arr[i][0] == '0')
+                WriteLine("Write the path to file");
+                var path = ReadLine();
+                using (var writeFile = new StreamWriter(path, false, Encoding.Default))
                 {
-                    arr[i] = arr[i].Remove(0, 1);
+                    foreach(WeeklyTask i in tasks)
+                    {
+                        writeFile.WriteLine(i.WriteToFile());
+                    }
                 }
             }
-            return arr;
         }
     }
 }
