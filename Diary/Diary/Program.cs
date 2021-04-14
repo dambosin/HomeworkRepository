@@ -5,200 +5,228 @@ using System.IO;
 using static System.Console;
 namespace Diary
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main()
         {
-                WriteCommands();
+                Start();
         }
         public enum Priority
         {
             Low = 10,
-            Medium = 14,
+            Medium = 6,
             High = 12
         }
-        public class WeeklyTask
+        public static void Start()
         {
-            public static int Counter;
-            public static bool operator >(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate > task2.TaskDate;
-            public static bool operator <(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate < task2.TaskDate;
-            public static bool operator ==(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate == task2.TaskDate;
-            public static bool operator !=(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate != task2.TaskDate;
-            public static bool operator >=(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate >= task2.TaskDate;
-            public static bool operator <=(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate <= task2.TaskDate;
-            public int CompareTo(WeeklyTask obj)
+            var tasks = new List<WeeklyTask>();
+            while (true)
             {
-                if (this > obj) return 1;
-                if (this == obj) return 0;
-                if (this < obj) return -1;
-                return 0;
-            }
-            public override string ToString()
-            {
-                return "ID " + TaskID + "; " + TaskName + "; " + TaskDate + "; " + TaskPriority + ";";
-            }
-            public string TaskName { get; set; }
-            public DateTime TaskDate { get; set; } = DateTime.Today.AddDays(1);
-            public Priority TaskPriority { get; set; } = Priority.Low;
-            public int TaskID { get; set; }
-
-            public WeeklyTask()
-            {
-                TaskID = Counter++;
-                TaskName = "Task №" + TaskID;
-            }
-            public WeeklyTask(string name)
-            {
-                TaskID = Counter++;
-                TaskName = name;
-            }
-            public WeeklyTask(string name, DateTime date)
-            {
-                TaskID = Counter++;
-                TaskName = name;
-                TaskDate = date;
-            }
-            public WeeklyTask(string name, DateTime date, Priority priority)
-            {
-                TaskID = Counter++;
-                TaskName = name;
-                TaskDate = date;
-                TaskPriority = priority;
-            }
-            public string WriteToFile()
-            {
-                return TaskName + "," + TaskDate + "," + TaskPriority;
-            }
-            public void DisplayTask()
-            {
-                ForegroundColor = (ConsoleColor)TaskPriority;
-                WriteLine($"ID {TaskID}");
-                WriteLine(TaskName);
-                WriteLine(TaskDate);
-                WriteLine($"Priority is {TaskPriority}\n");
-                ResetColor();
-            }
-
-            public void DisplayTask(bool isShort)
-            {
-                if (isShort)
+                WriteCommandsExample();
+                int userInput;
+                while (!int.TryParse(ReadLine(), out userInput))
                 {
-                    Console.ForegroundColor = (ConsoleColor)TaskPriority;
-                    Console.WriteLine(this);
-                    Console.ResetColor();
+                    IntTryParseError();
                 }
-                else
-                {
-                    DisplayTask();
-                }
+                ChooseCommandExample(tasks, userInput);
             }
         }
-        public static List<WeeklyTask> ReadDataFromFile()
+        public static void WriteCommandsExample()
         {
-                WriteLine("Write the path to file");
-                var path = ReadLine();
-                var tasks = new List<WeeklyTask>();
-                using (var readFile = new StreamReader(path, Encoding.Default))
+            ConsoleWrite("1) Read data from file");
+            ConsoleWrite("2) Store data to file");
+            ConsoleWrite("3) Add new task");
+            ConsoleWrite("4) Change task data");
+            ConsoleWrite("5) Show tasks");
+            ConsoleWrite("6) Show tasks with filter");
+            ConsoleWrite("==> Choose the command <==");
+        }
+        private static void ChooseCommandExample(List<WeeklyTask> tasks, int userInput)
+        {
+            switch (userInput)
+            {
+                case 1:
+                    tasks = ReadDataFromFile(tasks);
+                    break;
+                case 2:
+                    WriteDataToFile(tasks);
+                    break;
+                case 3:
+                    tasks.Add(AddTask());
+                    tasks.Sort((a, b) => a.CompareTo(b));
+                    break;
+                case 4:
+                    ChangeTaskData(tasks);
+                    break;
+                case 5:
+                    DisplayTasks(tasks);
+                    break;
+                case 6:
+                    DisplayTasksWithFilter(tasks);
+                    break;
+                default:
+                    ConsoleWrite("From 1 to 6 ...");
+                    break;
+            }
+        }
+        public static List<WeeklyTask> ReadDataFromFile(List<WeeklyTask> tasks)
+        {
+            var path = GetPath();
+            using var readFile = new StreamReader(path, Encoding.Default);
+                string line;   
+                while ((line = readFile.ReadLine()) != null)
                 {
-                    string line;   
-                    while ((line = readFile.ReadLine()) != null)
-                    {
-                        tasks.Add(DisassemblyLine(line));
-                    }
+                    tasks.Add(DisassemblyLine(line));
                 }
-                return tasks;
+            return tasks;
         }
         public static WeeklyTask DisassemblyLine(string line)
         {
             var array = line.Split(',');
-            switch (array.Length)
+            for (var i = 0; i < array.Length; i++)
             {
-                case 1:
-                    return new WeeklyTask(array[0]);
-                    break;
-                case 2:
-                    array[1] = array[1].Trim();
-                    if (!DateTime.TryParse(array[1], out var dateTime))
-                    {
-                        throw new Exception("Cannot disassembly the date");
-                    }
-                    return new WeeklyTask(array[0],dateTime);
-                    break;
-                default:
-                    array[1] = array[1].Trim();
-                    if (!DateTime.TryParse(array[1], out var dateTime2))
-                    {
-                        throw new Exception("Cannot disassembly the date");
-                    }
-                    array[2] = array[2].Trim();
-                    var priority = array[2].ToLower() switch
-                        {
-                            "low" => Priority.Low,
-                            "medium" => Priority.Medium,
-                            _ => Priority.High,
-                        };
-                        return new WeeklyTask(array[0], dateTime2, priority);
-                    break;
+                array[i] = array[i].Trim();
+            }
+            return array.Length switch
+            {
+                1 => new WeeklyTask(array[0]),
+                2 => new WeeklyTask(array[0], StringToDate(array[1])),
+                _ => new WeeklyTask(array[0], StringToDate(array[1]), StringToPriority(array[2])),
+            };
+        }
+        public static DateTime StringToDate(string dateString)
+        {
+            DateTime date;
+            while(!DateTime.TryParse(dateString, out date))
+            {
+                DateTryParseError();
+                dateString = ReadLine();
+            }
+            return date;
+        }
+        public static Priority StringToPriority(string priorityString)
+        {
+            while (true)
+            {
+                switch (priorityString.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                {
+                    case "low":
+                        return Priority.Low;
+                    case "medium":
+                        return Priority.Medium;
+                    case "high":
+                        return Priority.High;
+                    default:
+                        PriorityTryParseError();
+                        priorityString = ReadLine();
+                        break;
+                }
             }
         }
+        public static void DateTryParseError() => WriteLine("Incorrect enter of date. Please try again");
+        public static void PriorityTryParseError() => WriteLine("Incorrect enter of priority. Please try again");
+        public static void IntTryParseError() => WriteLine("Incorrect enter of int. Please try again");
         public static void WriteDataToFile(List<WeeklyTask> tasks)
         {
-            WriteLine("Write the path to file");
-            var path = ReadLine();
+            var path = GetPath();
             using var writeFile = new StreamWriter(path, false, Encoding.Default);
             foreach (var i in tasks)
             {
-                writeFile.WriteLine(i.WriteToFile());
+                writeFile.WriteLine(i.DataToFile());
             }
         }
-        public static WeeklyTask AddTask()
+        public static string GetPath()
         {
-            WriteLine("Write task in format \n\"Name, Date Time, Priority\"\n\"Name, Date Time\"\n\"Name\"");
+            ConsoleWrite("Enter path to file");
+            return ReadLine();
+        }
+         public static WeeklyTask AddTask()
+        {
+            ConsoleWrite("Write task in format \n\"Name, Date Time, Priority\"\n\"Name, Date Time\"\n\"Name\"");
             return DisassemblyLine(ReadLine());
         }
         public static void DisplayTasks(List<WeeklyTask> tasks)
         {
-            WriteLine("Do you want to see it in shor format?");
-            var ans = ReadLine().ToLower();
-            if(ans == "yes")
+            DisplayLine();
+            foreach (var i in tasks)
             {
-                foreach (var i in tasks)
-                {
-                    i.DisplayTask(true);
-                }
+                i.DisplayTask();
             }
-            else
+            DisplayLine();
+        }
+        public static void DisplayLine()
+        {
+            ForegroundColor = ConsoleColor.DarkBlue;
+            WriteLine("=====================================================================");
+        }
+        public static int GetID()
+        {
+            ConsoleWrite("Write ID of task");
+            int id;
+            while (!int.TryParse(ReadLine(), out id))
             {
-                foreach (var i in tasks)
+                ConsoleWrite("Wrong enter of ID");
+            }
+            return id;
+        }
+        public static List<WeeklyTask> ChangeTaskData(List<WeeklyTask> tasks)
+        {
+            DisplayTasks(tasks);
+            var id = GetID();
+            var i = 0;
+            while (tasks[i].TaskID != id && i < tasks.Count) i++;
+            ConsoleWrite("Write changes in format\nParametr value");
+            while (true)
+            {
+                var words = ReadLine().Split(' ');
+                switch (words[0].ToLower(System.Globalization.CultureInfo.CurrentCulture)[0])
                 {
-                    i.DisplayTask();
+                    case 'n':
+                        tasks[i].TaskName = words[1];
+                        return tasks;
+                    case 'd':
+                        tasks[i].TaskDate = words.Length > 2 ? StringToDate(words[1] + ' ' + words[2]) : StringToDate(words[1]);
+                        return tasks;
+                    case 'p':
+                        tasks[i].TaskPriority = StringToPriority(words[1]);
+                        return tasks;
+                    default:
+                        ConsoleWrite("Uncorrect enter of changes. Please try again");
+                        break;
                 }
             }
         }
         public static void DisplayTasksWithFilter(List<WeeklyTask> tasks)
         {
-            WriteLine("Enter filter in format \nFilter priority/date value");
-            var ans = ReadLine().ToLower();
-            var words = ans.Split(' ');
-            if (words[1][0] == 'p')
+            ConsoleWrite("Enter filter in format \npriority/date value");
+            while (true)
             {
-                DisplayTasksPriority(tasks, words[2]);
-            }
-            else
-            {
-                if (words.Length > 3)
+                var words = ReadLine().ToLower(System.Globalization.CultureInfo.CurrentCulture).Split(' ');
+                switch (words[0][0])
                 {
-                    DisplayTasksDate(tasks, words[2] + ' ' + words[3]);
-                }
-                else
-                {
-                    DisplayTasksDate(tasks, words[2]);
+                    case 'd':
+                        if (words.Length > 2)
+                        {
+                            DisplayTasksFilteredByDate(tasks, words[1] + ' ' + words[2]);
+                        }
+                        else
+                        {
+                            DisplayTasksFilteredByDate(tasks, words[1]);
+                        }
+                        return;
+                    case 'p':
+                        DisplayTasksFilteredByPriority(tasks, words[1]);
+                        return;
+                    default:
+                        ConsoleWrite("Uncorrect enter of filter. Please try again");
+                        break;
                 }
             }
         }
-        public static void DisplayTasksDate(List<WeeklyTask> tasks, string word)
+        public static void DisplayTasksFilteredByDate(List<WeeklyTask> tasks, string word)
         {
-            DateTime.TryParse(word, out DateTime date);
+            var date = StringToDate(word);
+            DisplayLine();
             foreach (var i in tasks)
             {
                 if (i.TaskDate >= date)
@@ -206,15 +234,12 @@ namespace Diary
                     i.DisplayTask();
                 }
             }
+            DisplayLine();
         }
-        public static void DisplayTasksPriority(List<WeeklyTask> tasks, string word)
+        public static void DisplayTasksFilteredByPriority(List<WeeklyTask> tasks, string word)
         {
-            var priority = word switch
-            {
-                "low" => Priority.Low,
-                "medium" => Priority.Medium,
-                _ => Priority.High
-            };
+            var priority = StringToPriority(word);
+            DisplayLine();
             foreach (var i in tasks)
             {
                 if(i.TaskPriority == priority)
@@ -222,108 +247,74 @@ namespace Diary
                     i.DisplayTask();
                 }
             }
+            DisplayLine();
         }
-        public static void DisplayTasks(List<WeeklyTask> tasks, bool isShort)
+        public static void ConsoleWrite(string sentence)
         {
-            foreach (var i in tasks)
-            {
-                i.DisplayTask(true);
-            }
-        }
-        public static List<WeeklyTask> ChangeTaskData(List<WeeklyTask> tasks)
-        {
-            DisplayTasks(tasks, true);
-            WriteLine("Write ID of task you want to change");
-            int id;
-            while(!int.TryParse(ReadLine(), out id))
-            {
-                WriteLine("Wrong enter");
-            }
-            var j = 0;
-            for (int i = 0; i < tasks.Count; i++)
-            {
-                if(tasks[i].TaskID == id)
-                {
-                    j = i;
-                }
-            }
-            WriteLine("1) Name");
-            WriteLine("2) Date");
-            WriteLine("3) Priority");
-            ForegroundColor = ConsoleColor.DarkBlue;
-            WriteLine("Which parametr you want to change");
+            ForegroundColor = ConsoleColor.DarkGreen;
+            WriteLine(sentence);
             ResetColor();
-            int.TryParse(ReadLine(), out int ans);
-            switch (ans)
-            {
-                case 1:
-                    WriteLine("Write new name");
-                    tasks[j].TaskName = ReadLine();
-                    break;
-                case 2:
-                    WriteLine("Write new date");
-                    DateTime.TryParse(ReadLine(), out var date);
-                    tasks[j].TaskDate = date;
-                    tasks.Sort((a, b) => a.CompareTo(b));
-                    break;
-                default:
-                    WriteLine("Write new priority");
-                    var priority = ReadLine().ToLower();
-                    switch (priority)
-                    {
-                        case "low":
-                            tasks[j].TaskPriority = Priority.Low;
-                            break;
-                        case "medium":
-                            tasks[j].TaskPriority = Priority.Medium;
-                            break;
-                        default:
-                            tasks[j].TaskPriority = Priority.High;
-                            break;
-                    }
-                    break;
-            }
-            return tasks;
         }
-        public static void WriteCommands()
+        public class WeeklyTask
         {
-            var tasks = new List<WeeklyTask>();
-            while (true) {
-                WriteLine("1) Read data from file");
-                WriteLine("2) Store data to file");
-                WriteLine("3) Add new task");
-                WriteLine("4) Change task data");
-                WriteLine("5) Show tasks");
-                WriteLine("6) Show tasks with filter");
-                ForegroundColor = ConsoleColor.DarkBlue;
-                WriteLine("==> Choose the command <==");
+            private static int s_counter;
+            public string TaskName { get; set; }
+            public DateTime TaskDate { get; set; } = DateTime.Today.AddDays(1);
+            public Priority TaskPriority { get; set; } = Priority.Low;
+            public int TaskID { get; set; }
+            public static bool operator >(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate > task2.TaskDate;
+            public static bool operator <(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate < task2.TaskDate;
+            public static bool operator ==(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate == task2.TaskDate;
+            public static bool operator !=(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate != task2.TaskDate;
+            public static bool operator >=(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate >= task2.TaskDate;
+            public static bool operator <=(WeeklyTask task1, WeeklyTask task2) => task1.TaskDate <= task2.TaskDate;
+            public override int GetHashCode() => TaskID;
+            public override string ToString()
+            {
+                return "ID " + TaskID + ", " + TaskName + ", " + TaskDate + ", " + TaskPriority + ",";
+            }
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                var objAsPart = obj as WeeklyTask;
+                if (objAsPart == null) return false;
+                else return Equals(objAsPart);
+            }
+            public bool Equals(WeeklyTask other)
+            {
+                if (other == null) return false;
+                return TaskID.Equals(other.TaskID);
+            }
+            public WeeklyTask(string name)
+            {
+                TaskID = s_counter++;
+                TaskName = name;
+            }
+            public WeeklyTask(string name, DateTime date)
+            {
+                TaskID = s_counter++;
+                TaskName = name;
+                TaskDate = date;
+            }
+            public WeeklyTask(string name, DateTime date, Priority priority)
+            {
+                TaskID = s_counter++;
+                TaskName = name;
+                TaskDate = date;
+                TaskPriority = priority;
+            }
+            public int CompareTo(WeeklyTask other)
+            {
+                if (this > other) { return 1; }
+                else if (this == other) { return 0; }
+                else { return -1; }
+            }      
+            public string DataToFile() => TaskName + "," + TaskDate + "," + TaskPriority;
+            public void DisplayTask()
+            {
+                ForegroundColor = (ConsoleColor)TaskPriority;
+                WriteLine(this);
                 ResetColor();
-                var answer = ReadLine();
-                switch (answer.ToLower())
-                {
-                    case "1":
-                        tasks = ReadDataFromFile();
-                        break;
-                    case "2":
-                        WriteDataToFile(tasks);
-                        break;
-                    case "3":
-                        tasks.Add(AddTask());
-                        tasks.Sort((a, b) => a.CompareTo(b));
-                        break;
-                    case "4":
-                        ChangeTaskData(tasks);
-                        break;
-                    case "5":
-                        DisplayTasks(tasks);
-                        break;
-                    case "6":
-                        DisplayTasksWithFilter(tasks);
-                        break;
-                    default:
-                        WriteLine("Uncorrect enter");
-                        break;
-                }
             }
         }
     }
