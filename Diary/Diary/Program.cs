@@ -57,6 +57,7 @@ namespace Diary
                     break;
                 case 4:
                     ChangeTaskData(tasks);
+                    tasks.Sort((a, b) => a.CompareTo(b));
                     break;
                 case 5:
                     DisplayTasks(tasks);
