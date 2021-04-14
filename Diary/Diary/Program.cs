@@ -9,7 +9,24 @@ namespace Diary
     {
         public static void Main()
         {
+            if (WelcomeToProgramm())
+            {
                 Start();
+            }
+            else
+            {
+                WriteLine("Then why did you open this programm?");
+            }
+        }
+        public static bool WelcomeToProgramm()
+        {
+            WriteLine("Hey it is my dairy programm.\nIt has an input check but I will appreceate if you will not try to breake it.\nDo you want to Start?");
+            var userInput = ReadLine().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+            return userInput switch
+            {
+                "yes" => true,
+                _ => false,
+            };
         }
         public enum Priority
         {
@@ -19,7 +36,7 @@ namespace Diary
         }
         public static void Start()
         {
-            var tasks = new List<WeeklyTask>();
+            var taskList = new List<WeeklyTask>();
             while (true)
             {
                 WriteCommandsExample();
@@ -28,7 +45,7 @@ namespace Diary
                 {
                     IntTryParseError();
                 }
-                ChooseCommandExample(tasks, userInput);
+                ChooseCommandExample(taskList, userInput);
             }
         }
         public static void WriteCommandsExample()
@@ -41,45 +58,45 @@ namespace Diary
             ConsoleWrite("6) Show tasks with filter");
             ConsoleWrite("==> Choose the command <==");
         }
-        private static void ChooseCommandExample(List<WeeklyTask> tasks, int userInput)
+        private static void ChooseCommandExample(List<WeeklyTask> taskList, int userInput)
         {
             switch (userInput)
             {
                 case 1:
-                    tasks = ReadDataFromFile(tasks);
+                    taskList = ReadDataFromFile(taskList);
                     break;
                 case 2:
-                    WriteDataToFile(tasks);
+                    WriteDataToFile(taskList);
                     break;
                 case 3:
-                    tasks.Add(AddTask());
-                    tasks.Sort((a, b) => a.CompareTo(b));
+                    taskList.Add(AddTask());
+                    taskList.Sort((a, b) => a.CompareTo(b));
                     break;
                 case 4:
-                    ChangeTaskData(tasks);
-                    tasks.Sort((a, b) => a.CompareTo(b));
+                    ChangeTaskData(taskList);
+                    taskList.Sort((a, b) => a.CompareTo(b));
                     break;
                 case 5:
-                    DisplayTasks(tasks);
+                    DisplayTasks(taskList);
                     break;
                 case 6:
-                    DisplayTasksWithFilter(tasks);
+                    DisplayTasksWithFilter(taskList);
                     break;
                 default:
                     ConsoleWrite("From 1 to 6 ...");
                     break;
             }
         }
-        public static List<WeeklyTask> ReadDataFromFile(List<WeeklyTask> tasks)
+        public static List<WeeklyTask> ReadDataFromFile(List<WeeklyTask> taskList)
         {
             var path = GetPath();
             using var readFile = new StreamReader(path, Encoding.Default);
-                string line;   
-                while ((line = readFile.ReadLine()) != null)
-                {
-                    tasks.Add(DisassemblyLine(line));
-                }
-            return tasks;
+            string line;   
+            while ((line = readFile.ReadLine()) != null)
+            {
+                taskList.Add(DisassemblyLine(line));
+            }
+            return taskList;
         }
         public static WeeklyTask DisassemblyLine(string line)
         {
@@ -127,11 +144,11 @@ namespace Diary
         public static void DateTryParseError() => WriteLine("Incorrect enter of date. Please try again");
         public static void PriorityTryParseError() => WriteLine("Incorrect enter of priority. Please try again");
         public static void IntTryParseError() => WriteLine("Incorrect enter of int. Please try again");
-        public static void WriteDataToFile(List<WeeklyTask> tasks)
+        public static void WriteDataToFile(List<WeeklyTask> taskList)
         {
             var path = GetPath();
             using var writeFile = new StreamWriter(path, false, Encoding.Default);
-            foreach (var i in tasks)
+            foreach (var i in taskList)
             {
                 writeFile.WriteLine(i.DataToFile());
             }
@@ -146,12 +163,12 @@ namespace Diary
             ConsoleWrite("Write task in format \n\"Name, Date Time, Priority\"\n\"Name, Date Time\"\n\"Name\"");
             return DisassemblyLine(ReadLine());
         }
-        public static void DisplayTasks(List<WeeklyTask> tasks)
+        public static void DisplayTasks(List<WeeklyTask> taskList)
         {
             DisplayLine();
-            foreach (var i in tasks)
+            foreach (var task in taskList)
             {
-                i.DisplayTask();
+                task.DisplayTask();
             }
             DisplayLine();
         }
@@ -170,12 +187,12 @@ namespace Diary
             }
             return id;
         }
-        public static List<WeeklyTask> ChangeTaskData(List<WeeklyTask> tasks)
+        public static List<WeeklyTask> ChangeTaskData(List<WeeklyTask> taskList)
         {
-            DisplayTasks(tasks);
+            DisplayTasks(taskList);
             var id = GetID();
             var i = 0;
-            while (tasks[i].TaskID != id && i < tasks.Count) i++;
+            while (taskList[i].TaskID != id && i < taskList.Count) i++;
             ConsoleWrite("Write changes in format\nParametr value");
             while (true)
             {
@@ -183,21 +200,21 @@ namespace Diary
                 switch (words[0].ToLower(System.Globalization.CultureInfo.CurrentCulture)[0])
                 {
                     case 'n':
-                        tasks[i].TaskName = words[1];
-                        return tasks;
+                        taskList[i].TaskName = words[1];
+                        return taskList;
                     case 'd':
-                        tasks[i].TaskDate = words.Length > 2 ? StringToDate(words[1] + ' ' + words[2]) : StringToDate(words[1]);
-                        return tasks;
+                        taskList[i].TaskDate = words.Length > 2 ? StringToDate(words[1] + ' ' + words[2]) : StringToDate(words[1]);
+                        return taskList;
                     case 'p':
-                        tasks[i].TaskPriority = StringToPriority(words[1]);
-                        return tasks;
+                        taskList[i].TaskPriority = StringToPriority(words[1]);
+                        return taskList;
                     default:
                         ConsoleWrite("Uncorrect enter of changes. Please try again");
                         break;
                 }
             }
         }
-        public static void DisplayTasksWithFilter(List<WeeklyTask> tasks)
+        public static void DisplayTasksWithFilter(List<WeeklyTask> taskList)
         {
             ConsoleWrite("Enter filter in format \npriority/date value");
             while (true)
@@ -208,15 +225,15 @@ namespace Diary
                     case 'd':
                         if (words.Length > 2)
                         {
-                            DisplayTasksFilteredByDate(tasks, words[1] + ' ' + words[2]);
+                            DisplayTasksFilteredByDate(taskList, words[1] + ' ' + words[2]);
                         }
                         else
                         {
-                            DisplayTasksFilteredByDate(tasks, words[1]);
+                            DisplayTasksFilteredByDate(taskList, words[1]);
                         }
                         return;
                     case 'p':
-                        DisplayTasksFilteredByPriority(tasks, words[1]);
+                        DisplayTasksFilteredByPriority(taskList, words[1]);
                         return;
                     default:
                         ConsoleWrite("Uncorrect enter of filter. Please try again");
@@ -224,28 +241,28 @@ namespace Diary
                 }
             }
         }
-        public static void DisplayTasksFilteredByDate(List<WeeklyTask> tasks, string word)
+        public static void DisplayTasksFilteredByDate(List<WeeklyTask> taskList, string word)
         {
             var date = StringToDate(word);
             DisplayLine();
-            foreach (var i in tasks)
+            foreach (var task in taskList)
             {
-                if (i.TaskDate >= date)
+                if (task.TaskDate >= date)
                 {
-                    i.DisplayTask();
+                    task.DisplayTask();
                 }
             }
             DisplayLine();
         }
-        public static void DisplayTasksFilteredByPriority(List<WeeklyTask> tasks, string word)
+        public static void DisplayTasksFilteredByPriority(List<WeeklyTask> taskList, string word)
         {
             var priority = StringToPriority(word);
             DisplayLine();
-            foreach (var i in tasks)
+            foreach (var task in taskList)
             {
-                if(i.TaskPriority == priority)
+                if(task.TaskPriority == priority)
                 {
-                    i.DisplayTask();
+                    task.DisplayTask();
                 }
             }
             DisplayLine();
@@ -315,7 +332,6 @@ namespace Diary
             {
                 ForegroundColor = (ConsoleColor)TaskPriority;
                 WriteLine(this);
-                ResetColor();
             }
         }
     }
