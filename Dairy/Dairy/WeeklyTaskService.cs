@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+
 namespace Dairy
 {
     internal class WeeklyTaskService
@@ -14,6 +15,32 @@ namespace Dairy
         public delegate void WriteOutput(string text);
         private readonly WriteOutput _writeText;
 
+        internal WeeklyTaskService(string path) => ReadTasksFromFile(path);
+        internal WeeklyTaskService(string path, ReadInput input) : this(path) => _readInput = input;
+        internal WeeklyTaskService(string path, ReadInput input, WriteOutput output) : this(path, input) => _writeText = output;
+
+        private void ReadTasksFromFile(string path)
+        {
+            Path = path;
+            StreamReader sr = new(path);
+            string line;
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                NewTaskHandler(line.Split(','));
+            }
+        }
+
+        private void WriteTasksToFile()
+        {
+            StreamWriter sw = new(Path);
+
+            for(var i = 0; i< _taskList.Count; i++)
+            {
+                sw.WriteLine(_taskList[i]);
+            }
+        }
+
         public void Loop()
         {
             string userInput = null;
@@ -26,6 +53,16 @@ namespace Dairy
             }
 
             WriteTasksToFile();
+        }
+
+        private void DisplayCommandList()
+        {
+            _writeText?.Invoke("Choose the command:\n" +
+                "1. Add new task;\n" +
+                "2. Modify task;\n" +
+                "3. Display tasks;\n" +
+                "4. Filter by date;\n" +
+                "5. Filter by priority.\n");
         }
 
         private void CommandHandler(string userInputString)
@@ -56,53 +93,6 @@ namespace Dairy
             }
         }
 
-        private void FilterByPriorityHandler()
-        {
-            _writeText("Enter priority");
-            var priority = Enum.Parse<Priority>(_readInput(), default);
-
-            for (var i = 0; i < _taskList.Count; i++)
-            {
-                if (_taskList[i] is PriorityTask task && task.TaskPriority == priority)
-                {
-                    _writeText($"{_taskList[i]}");
-                }
-            }
-        }
-
-        private void FilterByDateHandler()
-        {
-            _writeText("Enter date");
-            var date = DateTime.Parse(_readInput(), default);
-
-            for (var i = 0; i < _taskList.Count; i++)
-            {
-                if (_taskList[i].CompareTo(date) >= 0)
-                {
-                    _writeText($"{_taskList[i]}");
-                }
-            }
-        }
-
-        private void DisplayTasks()
-        {
-            for(var i = 0; i < _taskList.Count; i++)
-            {
-                _writeText($"{i + 1}. {_taskList[i]}");
-            }
-            _writeText("");
-        }
-
-        private void ModifyTaskHandler()
-        {
-            DisplayTasks();
-            _writeText("Choose the id of task");
-            var id = int.Parse(_readInput(),(IFormatProvider)default);
-            _taskList.Remove(_taskList[id-1]);
-            NewTaskHandler();
-            _writeText($"Task {id} was changed");
-        }
-
         private void NewTaskHandler()
         {
             _writeText("Write task in format Name,Date,Time,priority");
@@ -130,40 +120,51 @@ namespace Dairy
             _taskList.Sort((a, b) => a.CompareTo(b));
         }
 
-        private void DisplayCommandList()
+        private void ModifyTaskHandler()
         {
-            _writeText?.Invoke("Choose the command:\n" +
-                "1. Add new task;\n" +
-                "2. Modify task;\n" +
-                "3. Display tasks;\n" +
-                "4. Filter by date;\n" +
-                "5. Filter by priority.\n");
+            DisplayTasks();
+            _writeText("Choose the id of task");
+            var id = int.Parse(_readInput(), (IFormatProvider)default);
+            _taskList.Remove(_taskList[id - 1]);
+            NewTaskHandler();
+            _writeText($"Task {id} was changed");
         }
 
-        private void ReadTasksFromFile(string path)
+        private void DisplayTasks()
         {
-            Path = path;
-            StreamReader sr = new(path);
-            string line;
-
-            while ((line = sr.ReadLine()) != null)
+            for (var i = 0; i < _taskList.Count; i++)
             {
-                NewTaskHandler(line.Split(','));
+                _writeText($"{i + 1}. {_taskList[i]}");
+            }
+            _writeText("");
+        }
+
+        private void FilterByDateHandler()
+        {
+            _writeText("Enter date");
+            var date = DateTime.Parse(_readInput(), default);
+
+            for (var i = 0; i < _taskList.Count; i++)
+            {
+                if (_taskList[i].CompareTo(date) >= 0)
+                {
+                    _writeText($"{_taskList[i]}");
+                }
             }
         }
 
-        private void WriteTasksToFile()
+        private void FilterByPriorityHandler()
         {
-            StreamWriter sw = new(Path);
+            _writeText("Enter priority");
+            var priority = Enum.Parse<Priority>(_readInput(), default);
 
-            for(var i = 0; i< _taskList.Count; i++)
+            for (var i = 0; i < _taskList.Count; i++)
             {
-                sw.WriteLine(_taskList[i]);
+                if (_taskList[i] is PriorityTask task && task.TaskPriority == priority)
+                {
+                    _writeText($"{_taskList[i]}");
+                }
             }
         }
-
-        internal WeeklyTaskService(string path) => ReadTasksFromFile(path);
-        internal WeeklyTaskService(string path, ReadInput input) : this(path) => _readInput = input;
-        internal WeeklyTaskService(string path, ReadInput input, WriteOutput output) : this(path, input) => _writeText = output;
     }
 }
