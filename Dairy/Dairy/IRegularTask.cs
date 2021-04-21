@@ -2,10 +2,9 @@
 
 namespace Dairy
 {
-    internal interface IRegularTask: IWeeklyTask
+    internal interface IRegularTask : IWeeklyTask, IComparable
     {
-        public DateTime Date { get; }
-        public DateTime Time { get; }
-
+        DateTime Date { get; }
+        DateTime Time { get; }
     }
 }

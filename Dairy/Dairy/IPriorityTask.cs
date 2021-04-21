@@ -2,8 +2,8 @@
 
 namespace Dairy
 {
-    internal interface IPriorityTask:IRegularTask
+    internal interface IPriorityTask : IRegularTask
     {
-        public Priority TaskPriority { get; }
+        Priority TaskPriority { get; }
     }
 }
