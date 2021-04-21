@@ -7,6 +7,8 @@ namespace Dairy
 
         public override string ToString() => Name;
 
+        public abstract int CompareTo(object obj);
+
         public WeeklyTask(string name) => Name = name;
     }
 }

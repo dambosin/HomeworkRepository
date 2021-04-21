@@ -5,7 +5,7 @@ namespace Dairy
     internal class RegularTask : WeeklyTask, IRegularTask
     {
         public DateTime Date { get; private set; }
-        public DateTime Time { get; private set; } = new DateTime(1, 1, 1, 12, 0, 0);
+        public DateTime Time { get; private set; } = DateTime.MinValue;
 
         public override string ToString() => $"{base.ToString()},{Date.ToShortDateString()},{Time.ToShortTimeString()}";
 
