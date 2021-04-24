@@ -1,11 +1,10 @@
-using System;
+﻿using System;
 
 namespace BankLibrary
 {
     public class DepositAccount : Account
     {
-        public DepositAccount(decimal amount) 
-            : base(amount)
+        public DepositAccount(decimal amount)  : base(amount)
         {
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace BankLibrary
@@ -6,7 +6,7 @@ namespace BankLibrary
      public delegate void WriteOutput(string line);
     public class Bank<T> where T : Account
     {
-        private WriteOutput _writeOutput;
+        private readonly WriteOutput _writeOutput;
         private readonly List<T> _accounts = new();
 
         public Bank(WriteOutput writeOutput){
@@ -20,9 +20,9 @@ namespace BankLibrary
                 : new OnDemandAccount(parameters.Amount) as T);
         }
 
-        private void AssertValidType(AccountType type)
+        private static void AssertValidType(AccountType type)
         {
-            Type itemType = typeof(T);
+            var itemType = typeof(T);
             if(itemType != typeof(Account) && ((type == AccountType.Deposit && itemType != typeof(DepositAccount)) 
                                            || (type == AccountType.OnDemand && itemType != typeof(OnDemandAccount))))
             {

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace BankLibrary
 {
@@ -6,11 +6,13 @@ namespace BankLibrary
     
     public abstract class Account
     {
-        private static int _counter = 0;
+        private static int s_counter;
         private decimal _amount;
-        private int _id;
-        private int _days = 0;
+        protected int Days { get; private set; }
+        protected int Id { get; }
         private AccountState _state;
+        public abstract AccountType Type { get; }
+        public event AccountCreated Created;
 
         public override string ToString()
         {
@@ -24,13 +26,11 @@ namespace BankLibrary
             }
         }
 
-        public event AccountCreated Created;
-
         public Account(decimal amount)
         {
             _amount = amount;
             _state = AccountState.Created;
-            _id = ++_counter;
+            Id = ++s_counter;
         }
 
         public virtual void Open()
@@ -67,8 +67,6 @@ namespace BankLibrary
 
             _amount -= amount;
         }
-        
-        public abstract AccountType Type { get; }
 
         private void AssertValidState(AccountState validState)
         {
@@ -78,14 +76,11 @@ namespace BankLibrary
             }
         }
 
-        protected int Days => _days;
-        public int Id => _id;
-
         public void IncrementDays()
         {
             if (_state == AccountState.Opened)
             {
-                _days++;
+                Days++;
                 _amount += _amount / 1000;
             }
         }
