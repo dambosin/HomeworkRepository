@@ -1,4 +1,4 @@
-namespace BankLibrary
+﻿namespace BankLibrary
 {
     public class OpenAccountParameters
     {
@@ -6,6 +6,6 @@ namespace BankLibrary
         
         public decimal Amount { get; set; }
 
-        public AccountCreated AccountCreated { get; set; }
+        public AccountNotification AccountNotify { get; set; }
     }
 }

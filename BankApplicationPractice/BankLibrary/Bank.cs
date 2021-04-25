@@ -3,19 +3,19 @@ using System.Collections.Generic;
 
 namespace BankLibrary
 {
-     public delegate void WriteOutput(string line);
     public class Bank<T> where T : Account
     {
-        private readonly WriteOutput _writeOutput;
+        public Action<string> _writeOutput;
+
         private readonly List<T> _accounts = new();
 
-        public Bank(WriteOutput writeOutput){
+        public Bank(Action<string> writeOutput){
             _writeOutput = writeOutput;
         }
         public void OpenAccount(OpenAccountParameters parameters)
         {
             AssertValidType(parameters.Type);
-            CreateAccount(parameters.AccountCreated, () => parameters.Type == AccountType.Deposit 
+            CreateAccount(parameters.AccountNotify, () => parameters.Type == AccountType.Deposit 
                 ? new DepositAccount(parameters.Amount) as T
                 : new OnDemandAccount(parameters.Amount) as T);
         }
@@ -31,11 +31,12 @@ namespace BankLibrary
 
         }
 
-        private void CreateAccount(AccountCreated accountCreated, Func<T> creator)
+        private void CreateAccount(AccountNotification accountNotify, Func<T> creator)
         {
             var account = creator();
+            account.Notify += accountNotify;
             account.Open();
-            account.Created += accountCreated;
+            
             _accounts.Add(account);
         }
         public void Withdraw(int id, decimal amount)

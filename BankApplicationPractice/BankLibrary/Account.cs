@@ -2,7 +2,7 @@
 
 namespace BankLibrary
 {
-    public delegate void AccountCreated(string message);
+    public delegate void AccountNotification(string message);
     
     public abstract class Account
     {
@@ -12,7 +12,8 @@ namespace BankLibrary
         protected int Id { get; }
         private AccountState _state;
         public abstract AccountType Type { get; }
-        public event AccountCreated Created;
+        public event AccountNotification Notify;
+
 
         public override string ToString()
         {
@@ -38,8 +39,7 @@ namespace BankLibrary
             AssertValidState(AccountState.Created);
 
             _state = AccountState.Opened;
-            IncrementDays();
-            Created?.Invoke("Account created.");
+            Notify?.Invoke("Account created.");
         }
         
         public virtual void Close()
@@ -47,6 +47,8 @@ namespace BankLibrary
             AssertValidState(AccountState.Opened);
     
             _state = AccountState.Closed;
+
+            Notify?.Invoke("Account closed.");
         }
         
         public virtual void Put(decimal amount)
@@ -54,18 +56,23 @@ namespace BankLibrary
             AssertValidState(AccountState.Opened);
 
             _amount += amount;
+            Notify?.Invoke($"{amount} was added on account.");
         }
         
         public virtual void Withdraw(decimal amount)
         {
             AssertValidState(AccountState.Opened);
+            AssertValidAmount(amount);
+            _amount -= amount;
+            Notify?.Invoke($"{amount} was withdrawed from account");
+        }
 
+        private void AssertValidAmount(decimal amount)
+        {
             if (_amount < amount)
             {
                 throw new InvalidOperationException("Not enough money");
             }
-
-            _amount -= amount;
         }
 
         private void AssertValidState(AccountState validState)
@@ -81,8 +88,11 @@ namespace BankLibrary
             if (_state == AccountState.Opened)
             {
                 Days++;
-                _amount += _amount / 1000;
+                _amount = CalculatePercentages(_amount);
             }
         }
+
+        internal abstract decimal CalculatePercentages(decimal amount);
+
     }
 }

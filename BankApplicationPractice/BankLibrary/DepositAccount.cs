@@ -19,5 +19,10 @@ namespace BankLibrary
             
             base.Withdraw(amount);
         }
+
+        internal override decimal CalculatePercentages(decimal amount)
+        {
+            return amount / 10 + amount; 
+        }
     }
 }
