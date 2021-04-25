@@ -109,7 +109,6 @@ namespace BankApplication
             var id = Convert.ToInt32(Console.ReadLine(), (IFormatProvider)default);
 
             s_bank1.Put(id, sum);
-
         }
         
         private static void CloseAccount()
