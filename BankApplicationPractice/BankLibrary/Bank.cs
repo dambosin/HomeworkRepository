@@ -3,8 +3,29 @@ using System.Collections.Generic;
 
 namespace BankLibrary
 {
+
+    public class Locker
+    {
+        private object _data;
+        private string _keyword;
+        private int _id;
+
+        public Locker(int id, string keyword, object data)
+        {
+            _id = id;
+            _keyword = keyword;
+            _data = data;
+        }
+        public int Id => _id;
+        public object Data => _data;
+        public bool Matches(int id,string keyword)
+        {
+            return id == _id && keyword.Equals(_keyword, StringComparison.Ordinal);
+        }
+    }
     public class Bank<T> where T : Account
     {
+        private List<Locker> _lockers = new();
         public Action<string> _writeOutput;
 
         private readonly List<T> _accounts = new();
@@ -12,6 +33,34 @@ namespace BankLibrary
         public Bank(Action<string> writeOutput){
             _writeOutput = writeOutput;
         }
+
+        public int  AddLocker(string keyword, object data)
+        {
+
+            var locker = new Locker(_lockers.Count + 1, keyword, data);
+            _lockers.Add(locker);
+            return locker.Id;
+        }
+
+        public object GetLockerData(int id, string keyword)
+        {
+
+            foreach (var locker in _lockers)
+            {
+                if(locker.Matches(id, keyword))
+                {
+                    return locker.Data;
+                }
+            }
+            throw new ArgumentOutOfRangeException($"Cannot find locker with id {id} or keyword does not match");
+        }
+
+        public TU GetLockerData<TU>(int id, string keyword)
+        {
+
+            return (TU)GetLockerData(id, keyword);
+        }
+
         public void OpenAccount(OpenAccountParameters parameters)
         {
             AssertValidType(parameters.Type);
